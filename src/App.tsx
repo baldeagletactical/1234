@@ -12,10 +12,14 @@ import TermsAndConditions from './components/TermsAndConditions';
 import TwoDayCourseForm from './components/TwoDayCourseForm';
 import FiveDayCourseForm from './components/FiveDayCourseForm';
 import RefundPolicy from './components/RefundPolicy';
+import NotFound from './pages/NotFound';
 
 function App() {
+  // Get the base URL from Wix if available, otherwise use '/'
+  const baseUrl = (window as any).__WIX_BASE_URL__ || '/';
+
   return (
-    <Router>
+    <Router basename={baseUrl}>
       <div className="min-h-screen bg-tactical-950">
         <Navbar />
         <Routes>
@@ -35,6 +39,7 @@ function App() {
           <Route path="/two-day-course-registration" element={<TwoDayCourseForm />} />
           <Route path="/five-day-course-registration" element={<FiveDayCourseForm />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </div>

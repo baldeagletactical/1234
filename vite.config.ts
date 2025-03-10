@@ -9,6 +9,21 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  base: mode === 'production' ? '/Bald-Eagle-Tactical-Website/' : '/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@radix-ui/react-navigation-menu', '@radix-ui/react-dialog']
+        }
+      }
+    }
+  },
   plugins: [
     react(),
     mode === 'development' &&

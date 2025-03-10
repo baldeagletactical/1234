@@ -1,0 +1,57 @@
+{
+  "colors": {
+    "primary": {
+      "value": "#0c111f",
+      "description": "Primary tactical color - dark blue"
+    },
+    "secondary": {
+      "value": "#f59e0b",
+      "description": "Gold accent color"
+    },
+    "accent": {
+      "value": "#cc0000",
+      "description": "Brand red color"
+    },
+    "background": {
+      "value": "#141a2e",
+      "description": "Dark tactical background"
+    },
+    "text": {
+      "primary": "#ffffff",
+      "secondary": "#a4acba"
+    }
+  },
+  "fonts": {
+    "primary": {
+      "family": "Inter",
+      "weights": [400, 500, 600, 700]
+    },
+    "heading": {
+      "family": "Montserrat",
+      "weights": [600, 700]
+    },
+    "military": {
+      "family": "Saira Semi Condensed",
+      "weights": [400, 500, 600]
+    }
+  },
+  "spacing": {
+    "section": "2rem",
+    "container": "1400px"
+  },
+  "borderRadius": {
+    "small": "4px",
+    "medium": "6px",
+    "large": "8px"
+  },
+  "animations": {
+    "fadeIn": {
+      "duration": "0.5s",
+      "timing": "ease-out"
+    },
+    "slideIn": {
+      "duration": "0.7s",
+      "timing": "ease-out"
+    }
+  }
+} 
