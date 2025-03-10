@@ -9,7 +9,6 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  base: mode === 'production' ? '/Bald-Eagle-Tactical-Website/' : '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
