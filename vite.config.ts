@@ -1,11 +1,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
+import siteConfig from './src/config.json';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? '/1234/' : '/',
+  base: '/',
   server: {
     host: "::",
     port: 8080,
@@ -19,19 +19,26 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          ui: ['@/components/ui']
+          ui: [
+            '@radix-ui/react-navigation-menu',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-slot',
+            'class-variance-authority',
+            'clsx',
+            'tailwind-merge'
+          ]
         }
       }
     }
   },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    'process.env.WIX_SITE_ID': JSON.stringify(process.env.WIX_SITE_ID),
+    'process.env.WIX_API_KEY': JSON.stringify(process.env.WIX_API_KEY)
+  }
 }));
