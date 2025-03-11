@@ -13,8 +13,10 @@ const __dirname = dirname(__filename);
 const projectRoot = join(__dirname, '..');
 const distDir = join(projectRoot, 'dist');
 
+// Constants from Wix Editor URL
+const WIX_EDITOR_URL = 'https://editor.wix.com/html/editor/web/renderer/edit/f3a30a0e-f8ec-4645-b29b-407d76ec84fb?metaSiteId=fc285fb8-241e-4096-8c5e-46c1cf7ff6e8';
+const SITE_ID = process.env.WIX_SITE_ID || 'fc285fb8-241e-4096-8c5e-46c1cf7ff6e8';
 const API_KEY = process.env.WIX_API_KEY;
-const SITE_ID = process.env.WIX_SITE_ID;
 
 if (!API_KEY || !SITE_ID) {
   console.error('Error: WIX_API_KEY and WIX_SITE_ID must be set in .env file');
