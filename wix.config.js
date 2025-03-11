@@ -33,6 +33,14 @@ module.exports = {
     ]
   },
   build: {
-    directory: 'dist'
+    entry: './src/main.tsx',
+    outDir: './dist',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+    sourcemap: true
+  },
+  serve: {
+    port: 8080,
+    host: '0.0.0.0'
   }
 } 

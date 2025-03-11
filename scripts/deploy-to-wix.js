@@ -1,9 +1,8 @@
-import { createClient } from '@wix/sdk';
-import { readFileSync, readdirSync, statSync } from 'fs';
-import { join, relative } from 'path';
+import fetch from 'node-fetch';
+import { readFileSync, readdirSync } from 'fs';
+import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import mime from 'mime-types';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -14,81 +13,90 @@ const __dirname = dirname(__filename);
 const projectRoot = join(__dirname, '..');
 const distDir = join(projectRoot, 'dist');
 
-// Initialize Wix client
-const apiKey = process.env.WIX_API_KEY;
-const siteId = process.env.WIX_SITE_ID;
+const API_KEY = process.env.WIX_API_KEY;
+const SITE_ID = process.env.WIX_SITE_ID;
 
-if (!apiKey || !siteId) {
+if (!API_KEY || !SITE_ID) {
   console.error('Error: WIX_API_KEY and WIX_SITE_ID must be set in .env file');
   process.exit(1);
 }
 
-const wixClient = createClient({
-  auth: { apiKey },
-  modules: {
-    siteAssets: true
-  }
-});
-
-// Function to get all files in a directory recursively
-function getAllFiles(dir) {
-  const files = [];
-  const entries = readdirSync(dir);
-
-  entries.forEach(entry => {
-    const fullPath = join(dir, entry);
-    const stat = statSync(fullPath);
-
-    if (stat.isDirectory()) {
-      files.push(...getAllFiles(fullPath));
-    } else {
-      files.push(fullPath);
-    }
+async function getAccessToken() {
+  const response = await fetch('https://www.wixapis.com/oauth2/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      grant_type: 'client_credentials',
+      client_id: SITE_ID,
+      client_secret: API_KEY
+    })
   });
 
-  return files;
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to get access token: ${response.status} ${response.statusText}\n${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.access_token;
 }
 
-async function uploadFile(file) {
-  const relativePath = relative(distDir, file);
-  const content = readFileSync(file);
-  const mimeType = mime.lookup(file) || 'application/octet-stream';
+async function uploadFile(accessToken, filePath, relativePath) {
+  const content = readFileSync(filePath);
+  
+  const response = await fetch(`https://www.wixapis.com/site-assets/v1/files/upload`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      displayName: relativePath,
+      mediaType: 'document',
+      fileContent: content.toString('base64')
+    })
+  });
 
-  try {
-    // Upload the file using the Wix SDK
-    const uploadResponse = await wixClient.siteAssets.uploadFile({
-      fileName: relativePath,
-      mimeType,
-      content,
-      siteId
-    });
-
-    return uploadResponse;
-  } catch (error) {
-    throw new Error(`Failed to upload ${relativePath}: ${error.message}`);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to upload ${relativePath}: ${response.status} ${response.statusText}\n${errorText}`);
   }
+
+  return await response.json();
 }
 
 async function deploy() {
   try {
-    // Build the project
+    console.log('Starting deployment...');
+    
+    // Get access token
+    console.log('Getting access token...');
+    const accessToken = await getAccessToken();
+    
+    // Build the project (in case it hasn't been built)
     console.log('Building project...');
     const { execSync } = await import('child_process');
     execSync('npm run build', { stdio: 'inherit' });
-
-    // Get all files in the dist directory
-    console.log('Preparing files for upload...');
-    const files = getAllFiles(distDir);
-
-    // Upload each file
-    console.log('Uploading files to Wix...');
-    for (const file of files) {
-      const relativePath = relative(distDir, file);
-      console.log(`Uploading ${relativePath}...`);
-      await uploadFile(file);
+    
+    // Upload index.html first
+    console.log('Uploading index.html...');
+    await uploadFile(accessToken, join(distDir, 'index.html'), 'index.html');
+    
+    // Upload assets
+    console.log('Uploading assets...');
+    const assets = readdirSync(join(distDir, 'assets'));
+    for (const asset of assets) {
+      console.log(`Uploading ${asset}...`);
+      await uploadFile(
+        accessToken,
+        join(distDir, 'assets', asset),
+        `assets/${asset}`
+      );
     }
-
-    console.log('Deployment successful! Your site is now live on Wix.');
+    
+    console.log('Deployment successful! Your site should be live on Wix shortly.');
   } catch (error) {
     console.error('Deployment failed:', error.message);
     process.exit(1);

@@ -18,8 +18,8 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@radix-ui/react-navigation-menu', '@radix-ui/react-dialog']
+          vendor: ['react', 'react-dom'],
+          ui: ['@/components/ui']
         }
       }
     }
